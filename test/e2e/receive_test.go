@@ -154,13 +154,18 @@ func testReceive(t *testing.T, conf receiveTestConfig) {
 			return errors.Errorf("unexpected warnings %s", warnings)
 		}
 
-		expectedRes := len(conf.metrics)
-		if len(res) != expectedRes {
-			return errors.Errorf("unexpected result size %d, expected %d", len(res), expectedRes)
+		if len(res) != len(conf.metrics) {
+			return errors.Errorf("unexpected result size %d, expected %d", len(res), len(conf.metrics))
 		}
 
 		return nil
 	}))
+
+	select {
+	case <-exit:
+		return
+	default:
+	}
 
 	for i, metric := range conf.metrics {
 		testutil.Equals(t, metric, res[i].Metric)

@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/go-kit/kit/log"
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/common/route"
@@ -26,6 +28,7 @@ type Query struct {
 
 	cwd   string
 	birth time.Time
+	reg   prometheus.Registerer
 	now   func() model.Time
 }
 
@@ -38,7 +41,7 @@ type thanosVersion struct {
 	GoVersion string `json:"goVersion"`
 }
 
-func NewQueryUI(logger log.Logger, storeSet *query.StoreSet, flagsMap map[string]string) *Query {
+func NewQueryUI(logger log.Logger, reg prometheus.Registerer, storeSet *query.StoreSet, flagsMap map[string]string) *Query {
 	cwd, err := os.Getwd()
 	if err != nil {
 		cwd = "<error retrieving current working directory>"
@@ -49,6 +52,7 @@ func NewQueryUI(logger log.Logger, storeSet *query.StoreSet, flagsMap map[string
 		flagsMap: flagsMap,
 		cwd:      cwd,
 		birth:    time.Now(),
+		reg:      reg,
 		now:      model.Now,
 	}
 }

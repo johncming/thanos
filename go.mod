@@ -1,5 +1,8 @@
 module github.com/thanos-io/thanos
 
+// TODO(bwplotka): Pin to https://github.com/prometheus/prometheus/pull/5703 until it's merged.
+replace github.com/prometheus/prometheus => github.com/prometheus/prometheus v0.0.0-20190814100250-bd8bf91426aa
+
 require (
 	cloud.google.com/go v0.44.1
 	github.com/Azure/azure-storage-blob-go v0.7.0

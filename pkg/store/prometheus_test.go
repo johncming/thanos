@@ -65,15 +65,13 @@ func testPrometheusStoreSeriesE2e(t *testing.T, prefix string) {
 		// Query all three samples except for the first one. Since we round up queried data
 		// to seconds, we can test whether the extra sample gets stripped properly.
 		srv := newStoreSeriesServer(ctx)
-
-		err = proxy.Series(&storepb.SeriesRequest{
+		testutil.Ok(t, proxy.Series(&storepb.SeriesRequest{
 			MinTime: baseT + 101,
 			MaxTime: baseT + 300,
 			Matchers: []storepb.LabelMatcher{
 				{Type: storepb.LabelMatcher_EQ, Name: "a", Value: "b"},
 			},
-		}, srv)
-		testutil.Ok(t, err)
+		}, srv))
 
 		testutil.Equals(t, 1, len(srv.SeriesSet))
 

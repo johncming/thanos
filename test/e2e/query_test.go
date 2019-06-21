@@ -41,21 +41,18 @@ var (
 				Add(receiver(1, defaultPromRemoteWriteConfig(nodeExporterHTTP(1), remoteWriteEndpoint(1)), 1))
 )
 
-func TestQuery(t *testing.T) {
-	for _, tt := range []testConfig{
-		{
-			"staticFlag",
-			queryStaticFlagsSuite,
-		},
-		{
-			"fileSD",
-			queryFileSDSuite,
-		},
-	} {
-		t.Run(tt.name, func(t *testing.T) {
-			testQuerySimple(t, tt)
-		})
-	}
+func TestQueryStaticFlag(t *testing.T) {
+	testQuerySimple(t, testConfig{
+		"staticFlag",
+		queryStaticFlagsSuite,
+	})
+}
+
+func TestQueryFileSD(t *testing.T) {
+	testQuerySimple(t, testConfig{
+		"fileSD",
+		queryFileSDSuite,
+	})
 }
 
 // testQuerySimple runs a setup of Prometheus servers, sidecars, and query nodes and verifies that
@@ -86,7 +83,7 @@ func testQuerySimple(t *testing.T, conf testConfig) {
 		select {
 		case <-exit:
 			cancel()
-			return errors.Errorf("exiting test, possibly due to timeout")
+			return nil
 		default:
 		}
 
@@ -108,10 +105,16 @@ func testQuerySimple(t *testing.T, conf testConfig) {
 
 		expectedRes := 4
 		if len(res) != expectedRes {
-			return errors.Errorf("unexpected result size %d, expected %d", len(res), expectedRes)
+			return errors.Errorf("unexpected result size, expected %d; result: %v", expectedRes, res)
 		}
 		return nil
 	}))
+
+	select {
+	case <-exit:
+		return
+	default:
+	}
 
 	// In our model result are always sorted.
 	testutil.Equals(t, model.Metric{
@@ -171,11 +174,17 @@ func testQuerySimple(t *testing.T, conf testConfig) {
 
 		expectedRes := 3
 		if len(res) != expectedRes {
-			return errors.Errorf("unexpected result size %d, expected %d", len(res), expectedRes)
+			return errors.Errorf("unexpected result size, expected %d; result: %v", expectedRes, res)
 		}
 
 		return nil
 	}))
+
+	select {
+	case <-exit:
+		return
+	default:
+	}
 
 	testutil.Equals(t, model.Metric{
 		"__name__":   "up",
